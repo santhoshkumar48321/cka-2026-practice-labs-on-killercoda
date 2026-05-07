@@ -12,7 +12,7 @@ wait_kube() {
 wait_kube
 
 kubectl create namespace frontend --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace backend  --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace backend --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl label namespace frontend  ns=frontend --overwrite
 kubectl label namespace backend   ns=backend  --overwrite
