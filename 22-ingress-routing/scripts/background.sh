@@ -1,46 +1,89 @@
-#!/bin/bash
-# Setup script for scenario 22
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready after 60 seconds" >&2
+  exit 1
+}
 
-# Create namespace
-kubectl create namespace ing-private
+wait_kube
 
-# Create a simple hello service
-cat <<EOF | kubectl apply -f -
+kubectl apply -f - <<'YAML'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello
-  namespace: ing-private
+  name: app-v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hello
+      app: app-v1
   template:
     metadata:
       labels:
-        app: hello
+        app: app-v1
     spec:
       containers:
-      - name: hello
-        image: hashicorp/http-echo:0.2.3
-        args: ["-text=Hello from Kubernetes!"]
+      - name: app
+        image: nginx:latest
         ports:
-        - containerPort: 5678
----
+        - containerPort: 80
+YAML
+
+kubectl apply -f - <<'YAML'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-v2
+  template:
+    metadata:
+      labels:
+        app: app-v2
+    spec:
+      containers:
+      - name: app
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+YAML
+
+kubectl apply -f - <<'YAML'
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello
-  namespace: ing-private
+  name: app-v1
 spec:
+  type: ClusterIP
   selector:
-    app: hello
+    app: app-v1
   ports:
-  - port: 5678
-    targetPort: 5678
-EOF
+  - port: 80
+    targetPort: 80
+YAML
 
-echo "Setup complete. Service hello ready in ing-private namespace."
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-v2
+spec:
+  type: ClusterIP
+  selector:
+    app: app-v2
+  ports:
+  - port: 80
+    targetPort: 80
+YAML
+
+echo "Setup complete"
