@@ -20,6 +20,8 @@ if [ ! -f "$manifest" ]; then
   exit 1
 fi
 
+cp -a "$manifest" "${manifest}.bak.$(date +%s)"
+
 if grep -q -- '--etcd-servers=' "$manifest"; then
   sed -i -E '/--etcd-servers=/ s#(https://[^,[:space:]]+:)(2379)#\12380#g' "$manifest"
 fi

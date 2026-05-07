@@ -23,6 +23,7 @@ if [ -d /etc/cni/net.d ]; then
 fi
 
 systemctl restart kubelet
+sleep 2
 if ! systemctl is-active --quiet kubelet; then
   echo "kubelet is not active after restart" >&2
   exit 1
