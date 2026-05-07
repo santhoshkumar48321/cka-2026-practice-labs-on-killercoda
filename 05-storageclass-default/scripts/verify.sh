@@ -1,20 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-sc="itk-local"
+fail() {
+  echo "$1"
+  exit 1
+}
 
-kubectl get sc "$sc" >/dev/null
+sc="local-storage"
 
-# Check provisioner
-prov="$(kubectl get sc "$sc" -o jsonpath='{.provisioner}')"
-test "$prov" = "rancher.io/local-path"
+if ! kubectl get sc "$sc" >/dev/null 2>&1; then
+  fail "StorageClass $sc not found"
+fi
 
-# Check volumeBindingMode
-vbm="$(kubectl get sc "$sc" -o jsonpath='{.volumeBindingMode}')"
-test "$vbm" = "WaitForFirstConsumer"
+if ! test "$(kubectl get sc "$sc" -o jsonpath='{.provisioner}')" = "rancher.io/local-path"; then
+  fail "StorageClass $sc must use provisioner rancher.io/local-path"
+fi
 
-# Check default annotation
-ann="$(kubectl get sc "$sc" -o jsonpath='{.metadata.annotations.storageclass\.kubernetes\.io/is-default-class}')"
-test "$ann" = "true"
+if ! test "$(kubectl get sc "$sc" -o jsonpath='{.volumeBindingMode}')" = "WaitForFirstConsumer"; then
+  fail "StorageClass $sc must use volumeBindingMode WaitForFirstConsumer"
+fi
 
-echo "PASS: StorageClass itk-local exists, WFFC set, and is default."
+if ! test "$(kubectl get sc "$sc" -o jsonpath='{.metadata.annotations.storageclass\.kubernetes\.io/is-default-class}')" = "true"; then
+  fail "StorageClass $sc must be marked as default"
+fi
+
+echo "PASS"
+exit 0

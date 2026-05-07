@@ -1,19 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Detect node name
-node="node01"
-if ! kubectl get node "$node" >/dev/null 2>&1; then
-  node="$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')"
+fail() {
+  echo "$1"
+  exit 1
+}
+
+if ! kubectl get node worker-node01 >/dev/null 2>&1; then
+  fail "Node worker-node01 not found"
 fi
 
-# Check taint exists
-taints="$(kubectl get node "$node" -o jsonpath='{range .spec.taints[*]}{.key}{"="}{.value}{":"}{.effect}{"\n"}{end}')"
-echo "$taints" | grep -q '^IT=Kiddie:NoSchedule$'
+taints="$(kubectl get node worker-node01 -o jsonpath='{range .spec.taints[*]}{.key}{"="}{.value}{":"}{.effect}{"
+"}{end}')"
+if ! echo "$taints" | grep -q '^Env=Production:NoSchedule$'; then
+  fail "Node worker-node01 must be tainted with Env=Production:NoSchedule"
+fi
 
-# Check pod exists and scheduled to node
-kubectl get pod itk-taint-test >/dev/null
-pnode="$(kubectl get pod itk-taint-test -o jsonpath='{.spec.nodeName}')"
-test "$pnode" = "$node"
+if ! kubectl get pod prod-pod >/dev/null 2>&1; then
+  fail "Pod prod-pod not found"
+fi
 
-echo "PASS: Node tainted and pod scheduled on the tainted node."
+if ! test "$(kubectl get pod prod-pod -o jsonpath='{.spec.nodeName}')" = "worker-node01"; then
+  fail "Pod prod-pod must be scheduled on worker-node01"
+fi
+
+tolerations="$(kubectl get pod prod-pod -o jsonpath='{range .spec.tolerations[*]}{.key}{"="}{.value}{":"}{.effect}{"
+"}{end}')"
+if ! echo "$tolerations" | grep -q '^Env=Production:NoSchedule$'; then
+  fail "Pod prod-pod must include toleration Env=Production:NoSchedule"
+fi
+
+echo "PASS"
+exit 0
