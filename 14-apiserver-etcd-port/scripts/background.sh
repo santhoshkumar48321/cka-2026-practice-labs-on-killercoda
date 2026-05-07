@@ -10,7 +10,7 @@ fi
 cp -a "$manifest" "${manifest}.bak.$(date +%s)"
 
 if grep -q -- '--etcd-servers=' "$manifest"; then
-  sed -i -E '/--etcd-servers=/ s#(https://[^,[:space:]]+:)(2379)#S80#g' "$manifest"
+  sed -i -E '/--etcd-servers=/ s#(https://[^,[:space:]]+:)(2379)#\12380#g' "$manifest"
 fi
 if ! grep -q -- '--etcd-servers=.*2380' "$manifest"; then
   echo "Failed to update etcd endpoint port to 2380 in $manifest" >&2
