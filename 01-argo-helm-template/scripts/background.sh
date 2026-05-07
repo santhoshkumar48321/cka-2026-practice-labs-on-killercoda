@@ -15,7 +15,13 @@ wait_kube() {
 wait_kube
 
 if ! command -v helm >/dev/null 2>&1; then
-  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  installer="/tmp/get-helm-3.sh"
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o "$installer"
+  if ! bash "$installer"; then
+    echo "Failed to install helm" >&2
+    exit 1
+  fi
+  rm -f "$installer"
 fi
 
 echo "Setup complete"

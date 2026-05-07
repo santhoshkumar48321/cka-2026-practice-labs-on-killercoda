@@ -15,8 +15,14 @@ wait_kube() {
 wait_kube
 
 if ! command -v openssl >/dev/null 2>&1; then
-  apt-get update -y
-  apt-get install -y openssl
+  if ! apt-get update -y; then
+    echo "Failed to update apt package index for openssl installation" >&2
+    exit 1
+  fi
+  if ! apt-get install -y openssl; then
+    echo "Failed to install openssl" >&2
+    exit 1
+  fi
 fi
 
 echo "Setup complete"

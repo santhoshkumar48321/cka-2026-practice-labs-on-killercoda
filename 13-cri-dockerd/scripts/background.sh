@@ -15,8 +15,14 @@ wait_kube() {
 wait_kube
 
 if ! command -v docker >/dev/null 2>&1; then
-  apt-get update -y
-  apt-get install -y docker.io
+  if ! apt-get update -y; then
+    echo "Failed to update apt package index for docker installation" >&2
+    exit 1
+  fi
+  if ! apt-get install -y docker.io; then
+    echo "Failed to install docker.io" >&2
+    exit 1
+  fi
 fi
 
 echo "Setup complete"

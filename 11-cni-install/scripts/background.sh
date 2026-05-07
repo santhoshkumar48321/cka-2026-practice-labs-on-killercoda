@@ -16,5 +16,9 @@ wait_kube
 
 rm -rf /etc/cni/net.d/*
 systemctl restart kubelet
+if ! systemctl is-active --quiet kubelet; then
+  echo "kubelet is not active after restart" >&2
+  exit 1
+fi
 
 echo "Setup complete"
