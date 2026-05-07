@@ -14,6 +14,11 @@ wait_kube() {
 
 wait_kube
 
+backup_dir="/etc/cni/net.d.backup.$(date +%s)"
+if [ -d /etc/cni/net.d ]; then
+  cp -a /etc/cni/net.d "$backup_dir"
+fi
+
 rm -rf /etc/cni/net.d/*
 systemctl restart kubelet
 if ! systemctl is-active --quiet kubelet; then
