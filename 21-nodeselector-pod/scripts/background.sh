@@ -15,10 +15,9 @@ wait_kube() {
 wait_kube
 
 worker_node="$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master' -o jsonpath='{.items[0].metadata.name}')"
-if [ -z "$worker_node" ]; then
+if ! test -n "$worker_node"; then
   worker_node="$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')"
 fi
-
 kubectl label node "$worker_node" disk=ssd --overwrite
 
 echo "Setup complete"

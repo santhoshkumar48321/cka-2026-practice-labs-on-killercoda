@@ -12,22 +12,15 @@ wait_kube() {
   exit 1
 }
 
-wait_kube
-
 manifest="/etc/kubernetes/manifests/kube-apiserver.yaml"
-if [ ! -f "$manifest" ]; then
+if ! test -f "$manifest"; then
   echo "API server manifest not found at $manifest" >&2
   exit 1
 fi
 
-cp -a "$manifest" "${manifest}.bak.$(date +%s)"
+cp -a "$manifest" "${manifest}.bak"
+sed -i -E '/--etcd-servers=/ s#(https://[^,[:space:]]+:)(2379)#\12380#g' "$manifest"
 
-if grep -q -- '--etcd-servers=' "$manifest"; then
-  sed -i -E '/--etcd-servers=/ s#(https://[^,[:space:]]+:)(2379)#\12380#g' "$manifest"
-fi
-if ! grep -q -- '--etcd-servers=.*2380' "$manifest"; then
-  echo "Failed to update etcd endpoint port to 2380 in $manifest" >&2
-  exit 1
-fi
+wait_kube
 
 echo "Setup complete"

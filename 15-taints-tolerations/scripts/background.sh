@@ -14,13 +14,6 @@ wait_kube() {
 
 wait_kube
 
-worker_node="$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master' -o jsonpath='{.items[0].metadata.name}')"
-if [ -z "$worker_node" ]; then
-  worker_node="$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')"
-fi
-
-kubectl taint nodes "$worker_node" env=prod:NoSchedule --overwrite
-
-kubectl create deployment tainted-app --image=nginx:latest --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
+kubectl get node worker-node01 >/dev/null 2>&1 || true
 
 echo "Setup complete"

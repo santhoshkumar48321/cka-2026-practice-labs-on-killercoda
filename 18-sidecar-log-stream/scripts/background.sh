@@ -15,30 +15,21 @@ wait_kube() {
 wait_kube
 
 kubectl apply -f - <<'YAML'
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: logger
+  name: atlas-app
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: logger
-  template:
-    metadata:
-      labels:
-        app: logger
-    spec:
-      containers:
-      - name: log-writer
-        image: busybox:1.36
-        command: ["/bin/sh","-c","while true; do date >> /var/log/app.log; sleep 1; done"]
-        volumeMounts:
-        - name: shared-logs
-          mountPath: /var/log
-      volumes:
-      - name: shared-logs
-        emptyDir: {}
+  containers:
+  - name: atlas-app
+    image: busybox:1.36
+    command: ["/bin/sh", "-c", "while true; do echo app-log >> /var/log/atlas-app.log; sleep 2; done"]
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log
+  volumes:
+  - name: shared-logs
+    emptyDir: {}
 YAML
 
 echo "Setup complete"

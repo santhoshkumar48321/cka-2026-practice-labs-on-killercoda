@@ -1,13 +1,16 @@
 {
-  "title": "Cluster: Install a CNI (policy-capable)",
+  "backend": {
+    "imageid": "kubernetes-kubeadm-2nodes"
+  },
   "details": {
+    "title": "Cluster: Install a CNI (policy-capable)",
     "intro": {
       "text": "intro.md",
       "background": "scripts/background.sh"
     },
     "steps": [
       {
-        "title": "Task",
+        "title": "Step 1",
         "text": "step1.md",
         "verify": "scripts/verify.sh"
       }
@@ -15,8 +18,5 @@
     "finish": {
       "text": "finish.md"
     }
-  },
-  "backend": {
-    "imageid":"kubernetes-kubeadm-1node"
   }
 }

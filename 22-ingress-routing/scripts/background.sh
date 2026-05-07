@@ -14,76 +14,47 @@ wait_kube() {
 
 wait_kube
 
-kubectl apply -f - <<'YAML'
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: app-v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: app-v1
-  template:
-    metadata:
-      labels:
-        app: app-v1
-    spec:
-      containers:
-      - name: app
-        image: nginx:latest
-        ports:
-        - containerPort: 80
-YAML
+kubectl create namespace ing-private --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl apply -f - <<'YAML'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-v2
+  name: hello
+  namespace: ing-private
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: app-v2
+      app: hello
   template:
     metadata:
       labels:
-        app: app-v2
+        app: hello
     spec:
       containers:
-      - name: app
-        image: nginx:latest
+      - name: hello
+        image: hashicorp/http-echo:1.0.0
+        args:
+        - "-text=hello"
+        - "-listen=:5678"
         ports:
-        - containerPort: 80
+        - containerPort: 5678
 YAML
 
 kubectl apply -f - <<'YAML'
 apiVersion: v1
 kind: Service
 metadata:
-  name: app-v1
+  name: hello
+  namespace: ing-private
 spec:
-  type: ClusterIP
   selector:
-    app: app-v1
+    app: hello
   ports:
-  - port: 80
-    targetPort: 80
-YAML
-
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Service
-metadata:
-  name: app-v2
-spec:
-  type: ClusterIP
-  selector:
-    app: app-v2
-  ports:
-  - port: 80
-    targetPort: 80
+  - port: 5678
+    targetPort: 5678
+    protocol: TCP
 YAML
 
 echo "Setup complete"

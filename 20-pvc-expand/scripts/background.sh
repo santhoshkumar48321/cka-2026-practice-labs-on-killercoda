@@ -18,43 +18,12 @@ kubectl apply -f - <<'YAML'
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: expandable
+  name: csi-hostpath-sc
 provisioner: rancher.io/local-path
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
 YAML
 
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: data-pvc
-spec:
-  accessModes:
-  - ReadWriteOnce
-  storageClassName: expandable
-  resources:
-    requests:
-      storage: 1Gi
-YAML
-
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Pod
-metadata:
-  name: data-pod
-spec:
-  containers:
-  - name: app
-    image: busybox:1.36
-    command: ["/bin/sh","-c","sleep 3600"]
-    volumeMounts:
-    - name: data
-      mountPath: /data
-  volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: data-pvc
-YAML
+mkdir -p /opt/CKA2026
 
 echo "Setup complete"

@@ -1,13 +1,16 @@
 {
-  "title": "Cluster: List CRDs + kubectl explain extraction",
+  "backend": {
+    "imageid": "kubernetes-kubeadm-2nodes"
+  },
   "details": {
+    "title": "Cluster: List CRDs + kubectl explain extraction",
     "intro": {
       "text": "intro.md",
       "background": "scripts/background.sh"
     },
     "steps": [
       {
-        "title": "Task",
+        "title": "Step 1",
         "text": "step1.md",
         "verify": "scripts/verify.sh"
       }
@@ -15,12 +18,5 @@
     "finish": {
       "text": "finish.md"
     }
-  },
-  "backend": {
-    "imageid":"kubernetes-kubeadm-1node"
-  },
-  "environment": {
-    "CRD_NAME": "backups.stable.example.com",
-    "CRD_KIND": "Backup"
   }
 }

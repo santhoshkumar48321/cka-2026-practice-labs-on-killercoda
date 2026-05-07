@@ -14,31 +14,28 @@ wait_kube() {
 
 wait_kube
 
-kubectl create namespace team-a --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace team-b --dry-run=client -o yaml | kubectl apply -f -
-
 kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: team-a-pod
-  namespace: team-a
+  name: webapp-deployment
 spec:
-  containers:
-  - name: app
-    image: nginx:latest
-YAML
-
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Pod
-metadata:
-  name: team-b-pod
-  namespace: team-b
-spec:
-  containers:
-  - name: app
-    image: nginx:latest
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      initContainers:
+      - name: init-webapp
+        image: busybox:1.36
+        command: ["/bin/sh","-c","sleep 2"]
+      containers:
+      - name: webapp
+        image: nginx:1.27
 YAML
 
 echo "Setup complete"

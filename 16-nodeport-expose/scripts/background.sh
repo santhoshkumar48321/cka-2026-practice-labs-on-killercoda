@@ -14,20 +14,7 @@ wait_kube() {
 
 wait_kube
 
-kubectl create deployment web --image=nginx:latest --replicas=2 --dry-run=client -o yaml | kubectl apply -f -
-
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Service
-metadata:
-  name: web-svc
-spec:
-  type: ClusterIP
-  selector:
-    app: web
-  ports:
-  - port: 80
-    targetPort: 80
-YAML
+kubectl create namespace services --dry-run=client -o yaml | kubectl apply -f -
+kubectl create deployment service-deployment -n services --image=nginx:1.27 --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Setup complete"

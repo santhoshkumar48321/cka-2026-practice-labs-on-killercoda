@@ -14,7 +14,6 @@ wait_kube() {
 
 wait_kube
 
-kubectl create namespace apps --dry-run=client -o yaml | kubectl apply -f -
-kubectl create serviceaccount deploy-manager -n apps --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace app-squad --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Setup complete"

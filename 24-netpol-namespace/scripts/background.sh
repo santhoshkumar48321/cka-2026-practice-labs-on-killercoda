@@ -14,35 +14,31 @@ wait_kube() {
 
 wait_kube
 
-kubectl create namespace frontend --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace backend --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace echo --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace team-app --dry-run=client -o yaml | kubectl apply -f -
+kubectl label namespace team-app name=team-app --overwrite
 
 kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: frontend-pod
-  namespace: frontend
-  labels:
-    app: frontend
+  name: echo-server
+  namespace: echo
 spec:
-  containers:
-  - name: app
-    image: nginx:latest
-YAML
-
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Pod
-metadata:
-  name: backend-pod
-  namespace: backend
-  labels:
-    app: backend
-spec:
-  containers:
-  - name: app
-    image: nginx:latest
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo-server
+  template:
+    metadata:
+      labels:
+        app: echo-server
+    spec:
+      containers:
+      - name: echo-server
+        image: ealen/echo-server:latest
+        ports:
+        - containerPort: 9000
 YAML
 
 echo "Setup complete"

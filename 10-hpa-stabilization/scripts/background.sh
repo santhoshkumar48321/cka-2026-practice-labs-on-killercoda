@@ -14,24 +14,26 @@ wait_kube() {
 
 wait_kube
 
+kubectl create namespace scaling --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f - <<'YAML'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cpu-app
+  name: nginx-deployment
+  namespace: scaling
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: cpu-app
+      app: nginx
   template:
     metadata:
       labels:
-        app: cpu-app
+        app: nginx
     spec:
       containers:
-      - name: cpu-app
-        image: nginx:latest
+      - name: nginx
+        image: nginx:1.27
         resources:
           requests:
             cpu: 100m

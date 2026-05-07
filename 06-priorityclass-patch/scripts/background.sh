@@ -14,26 +14,26 @@ wait_kube() {
 
 wait_kube
 
+kubectl create namespace production --dry-run=client -o yaml | kubectl apply -f -
+
 kubectl apply -f - <<'YAML'
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
-  name: high-priority
+  name: platform-high
+value: 2000
+globalDefault: false
+description: "Baseline high priority"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: platform-medium
 value: 1000
 globalDefault: false
-description: "High priority class"
+description: "Baseline medium priority"
 YAML
 
-kubectl apply -f - <<'YAML'
-apiVersion: scheduling.k8s.io/v1
-kind: PriorityClass
-metadata:
-  name: low-priority
-value: 100
-globalDefault: false
-description: "Low priority class"
-YAML
-
-kubectl create deployment api-server --image=nginx:latest --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
+kubectl create deployment logger-app -n production --image=nginx:1.27 --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Setup complete"

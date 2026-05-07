@@ -1,13 +1,16 @@
 {
-  "title": "Networking: Ingress to Gateway API migration",
+  "backend": {
+    "imageid": "kubernetes-kubeadm-2nodes"
+  },
   "details": {
+    "title": "Networking: Ingress to Gateway API migration",
     "intro": {
       "text": "intro.md",
       "background": "scripts/background.sh"
     },
     "steps": [
       {
-        "title": "Task",
+        "title": "Step 1",
         "text": "step1.md",
         "verify": "scripts/verify.sh"
       }
@@ -15,8 +18,5 @@
     "finish": {
       "text": "finish.md"
     }
-  },
-  "backend": {
-    "imageid":"kubernetes-kubeadm-1node"
   }
 }

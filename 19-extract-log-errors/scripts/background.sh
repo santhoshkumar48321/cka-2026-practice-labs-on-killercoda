@@ -18,18 +18,20 @@ kubectl apply -f - <<'YAML'
 apiVersion: v1
 kind: Pod
 metadata:
-  name: log-pod
+  name: payment-api
 spec:
   containers:
-  - name: logger
+  - name: payment-api
     image: busybox:1.36
-    command: ["/bin/sh","-c","while true; do echo \"INFO request ok\" >> /var/log/app.log; echo \"ERROR failed to process\" >> /var/log/app.log; sleep 1; done"]
+    command: ["/bin/sh", "-c", "while true; do echo info started; echo error file-not-found; sleep 2; done"]
     volumeMounts:
-    - name: shared-logs
+    - name: applogs
       mountPath: /var/log
   volumes:
-  - name: shared-logs
+  - name: applogs
     emptyDir: {}
 YAML
+
+mkdir -p /opt/CKA2026/payment-api
 
 echo "Setup complete"

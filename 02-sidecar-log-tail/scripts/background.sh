@@ -14,6 +14,31 @@ wait_kube() {
 
 wait_kube
 
-kubectl create deployment webapp --image=nginx:latest --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -f - <<'YAML'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: nginx:1.27
+        command: ["/bin/sh", "-c", "while true; do echo app >> /var/log/application.log; sleep 2; done"]
+        volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log
+      volumes:
+      - name: shared-logs
+        emptyDir: {}
+YAML
 
 echo "Setup complete"

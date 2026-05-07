@@ -14,13 +14,37 @@ wait_kube() {
 
 wait_kube
 
-kubectl apply -f - <<'YAML'
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
+kubectl create namespace database --dry-run=client -o yaml | kubectl apply -f -
+
+cat <<'YAML' >/opt/database.yaml
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: standard
-provisioner: rancher.io/local-path
-volumeBindingMode: WaitForFirstConsumer
+  name: mariadb
+  namespace: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:11
+        env:
+        - name: MARIADB_ROOT_PASSWORD
+          value: rootpass
+        volumeMounts:
+        - name: dbdata
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: dbdata
+        persistentVolumeClaim:
+          claimName: REPLACE_WITH_DATABASE_STORAGE
 YAML
 
 echo "Setup complete"

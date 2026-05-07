@@ -14,15 +14,9 @@ wait_kube() {
 
 wait_kube
 
-if ! command -v docker >/dev/null 2>&1; then
-  if ! apt-get update -y; then
-    echo "Failed to update apt package index for docker installation" >&2
-    exit 1
-  fi
-  if ! apt-get install -y docker.io; then
-    echo "Failed to install docker.io" >&2
-    exit 1
-  fi
+pkg="$HOME/cri-dockerd_0.3.15.3-0.ubuntu-jammy_amd64.deb"
+if ! test -f "$pkg"; then
+  curl -fsSL -o "$pkg" "https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.15/cri-dockerd_0.3.15.3-0.ubuntu-jammy_amd64.deb" || true
 fi
 
 echo "Setup complete"

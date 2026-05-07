@@ -1,20 +1,22 @@
 {
+  "backend": {
+    "imageid": "kubernetes-kubeadm-2nodes"
+  },
+  "details": {
     "title": "24: NetworkPolicy Namespace Restriction",
-    "description": "Create NetworkPolicy allowing only specific namespace access",
-    "details": {
-        "intro": {
-            "text": "intro.md"
-        },
-        "steps": [
-            {
-                "text": "step1.md"
-            }
-        ],
-        "finish": {
-            "text": "finish.md"
-        }
+    "intro": {
+      "text": "intro.md",
+      "background": "scripts/background.sh"
     },
-    "backend": {
-        "imageid": "kubernetes-kubeadm-1node"
+    "steps": [
+      {
+        "title": "Step 1",
+        "text": "step1.md",
+        "verify": "scripts/verify.sh"
+      }
+    ],
+    "finish": {
+      "text": "finish.md"
     }
+  }
 }

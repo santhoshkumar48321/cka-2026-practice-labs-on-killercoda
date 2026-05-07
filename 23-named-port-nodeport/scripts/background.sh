@@ -14,27 +14,26 @@ wait_kube() {
 
 wait_kube
 
+kubectl create namespace portal --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f - <<'YAML'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: ui-frontend
+  namespace: portal
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: ui-frontend
   template:
     metadata:
       labels:
-        app: backend
+        app: ui-frontend
     spec:
       containers:
-      - name: backend
-        image: nginx:latest
-        ports:
-        - name: http
-          containerPort: 80
+      - name: ui-frontend
+        image: nginx:1.27
 YAML
 
 echo "Setup complete"

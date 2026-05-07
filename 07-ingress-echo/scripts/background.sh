@@ -14,40 +14,7 @@ wait_kube() {
 
 wait_kube
 
-kubectl apply -f - <<'YAML'
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: echo
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: echo
-  template:
-    metadata:
-      labels:
-        app: echo
-    spec:
-      containers:
-      - name: echo
-        image: ealen/echo-server
-        ports:
-        - containerPort: 80
-YAML
-
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Service
-metadata:
-  name: echo-svc
-spec:
-  type: ClusterIP
-  selector:
-    app: echo
-  ports:
-  - port: 80
-    targetPort: 80
-YAML
+kubectl create namespace demo-app --dry-run=client -o yaml | kubectl apply -f -
+kubectl create deployment app -n demo-app --image=ealen/echo-server:latest --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Setup complete"

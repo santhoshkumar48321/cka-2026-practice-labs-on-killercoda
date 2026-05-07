@@ -14,51 +14,24 @@ wait_kube() {
 
 wait_kube
 
-kubectl apply -f - <<'YAML'
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: web
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: web
-  template:
-    metadata:
-      labels:
-        app: web
-    spec:
-      containers:
-      - name: web
-        image: nginx:latest
-        ports:
-        - containerPort: 80
-YAML
-
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Service
-metadata:
-  name: web-svc
-spec:
-  type: ClusterIP
-  selector:
-    app: web
-  ports:
-  - port: 80
-    targetPort: 80
-YAML
+kubectl create deployment web --image=nginx:1.27 --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
+kubectl create service clusterip web-svc --tcp=80:80 --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic api-tls --from-literal=tls.crt=dummy --from-literal=tls.key=dummy --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl apply -f - <<'YAML'
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: web-ingress
+  name: api-ingress
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - api.demo.k8s.local
+    secretName: api-tls
   rules:
-  - http:
+  - host: api.demo.k8s.local
+    http:
       paths:
       - path: /
         pathType: Prefix
