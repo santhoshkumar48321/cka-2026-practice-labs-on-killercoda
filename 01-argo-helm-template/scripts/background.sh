@@ -14,6 +14,8 @@ wait_kube() {
 
 wait_kube
 
+mkdir -p /home/candidate
+
 if ! command -v helm >/dev/null 2>&1; then
   installer="/tmp/get-helm-3.sh"
   curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o "$installer"
