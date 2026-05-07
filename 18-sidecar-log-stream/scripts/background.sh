@@ -2,34 +2,44 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl apply -f - <<'YAML'
-apiVersion: v1
-kind: Pod
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: atlas-app
+  name: logger
 spec:
-  containers:
-  - name: atlas-app
-    image: busybox:1.36
-    command: ["/bin/sh", "-c", "while true; do echo app-log >> /var/log/atlas-app.log; sleep 2; done"]
-    volumeMounts:
-    - name: shared-logs
-      mountPath: /var/log
-  volumes:
-  - name: shared-logs
-    emptyDir: {}
-YAML
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logger
+  template:
+    metadata:
+      labels:
+        app: logger
+    spec:
+      volumes:
+      - name: log-vol
+        emptyDir: {}
+      containers:
+      - name: log-writer
+        image: busybox:1.36
+        command: ["/bin/sh", "-c"]
+        args:
+        - while true; do echo "$(date) INFO log entry" >> /var/log/app.log; sleep 1; done
+        volumeMounts:
+        - name: log-vol
+          mountPath: /var/log
+EOF
 
-echo "Setup complete"
+kubectl wait --for=condition=available deployment/logger --timeout=90s
+
+echo "Setup complete: logger deployment writing to /var/log/app.log"

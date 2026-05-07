@@ -2,25 +2,18 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-mkdir -p /home/candidate
-
-if ! command -v helm >/dev/null 2>&1; then
-  installer="/tmp/get-helm-3.sh"
-  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o "$installer"
-  bash "$installer"
-  rm -f "$installer"
+# Install helm if not present
+if ! command -v helm &>/dev/null; then
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
-echo "Setup complete"
+echo "Setup complete: helm ready"

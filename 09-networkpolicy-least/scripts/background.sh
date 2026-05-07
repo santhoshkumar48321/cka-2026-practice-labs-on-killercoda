@@ -2,55 +2,42 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl create namespace frontend --dry-run=client -o yaml | kubectl apply -f -
-kubectl create namespace backend --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace restricted --dry-run=client -o yaml | kubectl apply -f -
 
-kubectl apply -f - <<'YAML'
+kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
-  name: frontend-app
-  namespace: frontend
+  name: app-pod
+  namespace: restricted
   labels:
-    app: frontend-app
+    app: app
 spec:
   containers:
-  - name: frontend-app
-    image: busybox:1.36
-    command: ["/bin/sh","-c","sleep 3600"]
+  - name: app
+    image: nginx:latest
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: backend-api
-  namespace: backend
+  name: allowed-client
+  namespace: restricted
+  labels:
+    app: client
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: backend-api
-  template:
-    metadata:
-      labels:
-        app: backend-api
-    spec:
-      containers:
-      - name: backend-api
-        image: nginx:1.27
-        ports:
-        - containerPort: 80
-YAML
+  containers:
+  - name: client
+    image: busybox:1.36
+    command: ["sleep", "3600"]
+EOF
 
-echo "Setup complete"
+echo "Setup complete: restricted namespace with app-pod and allowed-client ready"

@@ -2,36 +2,40 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl apply -f - <<'YAML'
+kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
-  name: payment-api
+  name: log-pod
 spec:
   containers:
-  - name: payment-api
+  - name: log-gen
     image: busybox:1.36
-    command: ["/bin/sh", "-c", "while true; do echo info started; echo error file-not-found; sleep 2; done"]
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      while true; do
+        echo "INFO: application started" >> /var/log/app.log
+        echo "ERROR: connection refused" >> /var/log/app.log
+        echo "INFO: processing request" >> /var/log/app.log
+        echo "ERROR: timeout occurred" >> /var/log/app.log
+        sleep 2
+      done
     volumeMounts:
-    - name: applogs
+    - name: log-vol
       mountPath: /var/log
   volumes:
-  - name: applogs
+  - name: log-vol
     emptyDir: {}
-YAML
+EOF
 
-mkdir -p /opt/CKA2026/payment-api
-
-echo "Setup complete"
+echo "Setup complete: log-pod generating mixed INFO/ERROR logs"

@@ -2,40 +2,21 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl apply -f - <<'YAML'
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: webapp-deployment
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: webapp
-  template:
-    metadata:
-      labels:
-        app: webapp
-    spec:
-      initContainers:
-      - name: init-webapp
-        image: busybox:1.36
-        command: ["/bin/sh","-c","sleep 2"]
-      containers:
-      - name: webapp
-        image: nginx:1.27
-YAML
+kubectl create namespace team-a --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace team-b --dry-run=client -o yaml | kubectl apply -f -
 
-echo "Setup complete"
+kubectl create deployment app-a --image=nginx:latest -n team-a \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl create deployment app-b --image=nginx:latest -n team-b \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+echo "Setup complete: namespaces team-a and team-b with deployments ready"

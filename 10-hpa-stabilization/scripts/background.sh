@@ -2,42 +2,45 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl create namespace scaling --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -f - <<'YAML'
+kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
-  namespace: scaling
+  name: cpu-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nginx
+      app: cpu-app
   template:
     metadata:
       labels:
-        app: nginx
+        app: cpu-app
     spec:
       containers:
-      - name: nginx
-        image: nginx:1.27
+      - name: cpu-app
+        image: nginx:latest
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
-YAML
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+EOF
 
-echo "Setup complete"
+kubectl wait --for=condition=available deployment/cpu-app --timeout=90s
+
+# Install metrics-server if not present
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml || true
+
+echo "Setup complete: cpu-app deployment ready"

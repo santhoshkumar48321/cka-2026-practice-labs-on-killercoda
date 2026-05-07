@@ -2,18 +2,18 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl create namespace app-squad --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace apps --dry-run=client -o yaml | kubectl apply -f -
 
-echo "Setup complete"
+kubectl create serviceaccount deploy-manager -n apps \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+echo "Setup complete: namespace 'apps' and ServiceAccount 'deploy-manager' ready"

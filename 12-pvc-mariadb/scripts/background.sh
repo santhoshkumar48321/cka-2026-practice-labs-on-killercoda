@@ -2,49 +2,26 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl create namespace database --dry-run=client -o yaml | kubectl apply -f -
-
-cat <<'YAML' >/opt/database.yaml
-apiVersion: apps/v1
-kind: Deployment
+# Ensure a default StorageClass exists
+kubectl apply -f - <<EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
 metadata:
-  name: mariadb
-  namespace: database
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mariadb
-  template:
-    metadata:
-      labels:
-        app: mariadb
-    spec:
-      containers:
-      - name: mariadb
-        image: mariadb:11
-        env:
-        - name: MARIADB_ROOT_PASSWORD
-          value: rootpass
-        volumeMounts:
-        - name: dbdata
-          mountPath: /var/lib/mysql
-      volumes:
-      - name: dbdata
-        persistentVolumeClaim:
-          claimName: REPLACE_WITH_DATABASE_STORAGE
-YAML
+  name: standard
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: rancher.io/local-path
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+EOF
 
-echo "Setup complete"
+echo "Setup complete: StorageClass 'standard' ready. User must create PVC and MariaDB pod."

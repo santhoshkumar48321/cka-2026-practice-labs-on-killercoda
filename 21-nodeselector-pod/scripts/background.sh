@@ -2,22 +2,20 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-worker_node="$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master' -o jsonpath='{.items[0].metadata.name}')"
-if ! test -n "$worker_node"; then
-  worker_node="$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')"
-fi
-kubectl label node "$worker_node" disk=ssd --overwrite
+WORKER=$(kubectl get nodes --no-headers | grep -v control-plane | awk '{print $1}' | head -1)
 
-echo "Setup complete"
+if [ -n "$WORKER" ]; then
+  kubectl label node "$WORKER" disk=ssd --overwrite
+  echo "Setup complete: node $WORKER labeled with disk=ssd"
+else
+  echo "No worker node found"
+fi

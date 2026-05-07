@@ -2,38 +2,34 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl create namespace production --dry-run=client -o yaml | kubectl apply -f -
-
-kubectl apply -f - <<'YAML'
+kubectl apply -f - <<EOF
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
-  name: platform-high
-value: 2000
+  name: high-priority
+value: 1000
 globalDefault: false
-description: "Baseline high priority"
+description: "High priority workloads"
 ---
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
-  name: platform-medium
-value: 1000
+  name: low-priority
+value: 100
 globalDefault: false
-description: "Baseline medium priority"
-YAML
+description: "Low priority workloads"
+EOF
 
-kubectl create deployment logger-app -n production --image=nginx:1.27 --replicas=1 --dry-run=client -o yaml | kubectl apply -f -
+kubectl create deployment api-server --image=nginx:latest --replicas=2 \
+  --dry-run=client -o yaml | kubectl apply -f -
 
-echo "Setup complete"
+echo "Setup complete: PriorityClasses and api-server deployment ready"

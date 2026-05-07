@@ -2,32 +2,25 @@
 set -euo pipefail
 
 wait_kube() {
+  echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
-    if kubectl get ns >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 1
+    if kubectl get ns >/dev/null 2>&1; then return 0; fi
+    sleep 2
   done
-  echo "Kubernetes API not ready after 60 seconds" >&2
-  exit 1
+  echo "Kubernetes API not ready"; exit 1
 }
-
 wait_kube
 
-kubectl apply -f - <<'YAML'
+# Install a sample CRD for practice
+kubectl apply -f - <<EOF
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: virtualservices.networking.istio.io
+  name: backups.stable.example.com
 spec:
-  group: networking.istio.io
-  scope: Namespaced
-  names:
-    plural: virtualservices
-    singular: virtualservice
-    kind: VirtualService
+  group: stable.example.com
   versions:
-  - name: v1beta1
+  - name: v1
     served: true
     storage: true
     schema:
@@ -37,10 +30,15 @@ spec:
           spec:
             type: object
             properties:
-              hosts:
-                type: array
-                items:
-                  type: string
-YAML
+              storageClass:
+                type: string
+              backupInterval:
+                type: string
+  scope: Namespaced
+  names:
+    plural: backups
+    singular: backup
+    kind: Backup
+EOF
 
-echo "Setup complete"
+echo "Setup complete: sample CRD installed"
