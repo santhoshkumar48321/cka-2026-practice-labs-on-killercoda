@@ -13,7 +13,11 @@ if ! test "$app_label" = "echo-server"; then
 fi
 
 ports="$(kubectl get networkpolicy allow-9000-from-team -n echo -o jsonpath='{range .spec.ingress[*].ports[*]}{.port}{"\n"}{end}')"
-if ! echo "$ports" | awk '$1==9000{ok=1} $1!="" && $1!=9000{bad=1} END{exit (ok==1 && bad!=1)?0:1}'; then
+if ! echo "$ports" | awk '$1==9000{ok=1} END{exit ok?0:1}'; then
+  echo "NetworkPolicy must include port 9000 in ingress rules"
+  exit 1
+fi
+if ! echo "$ports" | awk '$1!="" && $1!=9000{bad=1} END{exit bad?1:0}'; then
   echo "NetworkPolicy must allow ingress only on port 9000"
   exit 1
 fi
@@ -26,11 +30,8 @@ fi
 
 name_labels="$(kubectl get networkpolicy allow-9000-from-team -n echo -o jsonpath='{range .spec.ingress[*].from[*]}{.namespaceSelector.matchLabels.name}{"\n"}{end}')"
 meta_labels="$(kubectl get networkpolicy allow-9000-from-team -n echo -o jsonpath="{range .spec.ingress[*].from[*]}{.namespaceSelector.matchLabels['kubernetes.io/metadata.name']}{\"\n\"}{end}")"
-combined_labels="$(cat <<EOF
-$name_labels
-$meta_labels
-EOF
-)"
+combined_labels="$name_labels
+$meta_labels"
 
 if ! echo "$combined_labels" | awk '$1=="team-app"{ok=1} END{exit ok?0:1}'; then
   echo "NetworkPolicy must allow ingress from namespace team-app"
