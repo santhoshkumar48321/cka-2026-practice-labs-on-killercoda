@@ -24,6 +24,12 @@ spec:
   - name: logger
     image: busybox:1.36
     command: ["/bin/sh","-c","while true; do echo \"INFO request ok\" >> /var/log/app.log; echo \"ERROR failed to process\" >> /var/log/app.log; sleep 1; done"]
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log
+  volumes:
+  - name: shared-logs
+    emptyDir: {}
 YAML
 
 echo "Setup complete"
