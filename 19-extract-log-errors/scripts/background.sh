@@ -22,6 +22,9 @@ kind: Pod
 metadata:
   name: payment-api
 spec:
+  volumes:
+  - name: app-logs
+    emptyDir: {}
   containers:
   - name: payment-api
     image: busybox:1.36
@@ -29,13 +32,16 @@ spec:
     args:
     - |
       while true; do
-        echo "INFO processing payment request id=1234"
-        echo "error file-not-found: receipt_1234.pdf"
-        echo "INFO payment completed successfully"
-        echo "error file-not-found: invoice_5678.pdf"
-        echo "INFO request completed"
+        echo "INFO processing payment request id=1234" | tee -a /var/log/payment-api.log
+        echo "error file-not-found: receipt_1234.pdf" | tee -a /var/log/payment-api.log
+        echo "INFO payment completed successfully" | tee -a /var/log/payment-api.log
+        echo "error file-not-found: invoice_5678.pdf" | tee -a /var/log/payment-api.log
+        echo "INFO request completed" | tee -a /var/log/payment-api.log
         sleep 2
       done
+    volumeMounts:
+    - name: app-logs
+      mountPath: /var/log
 YAML
 
 echo "Setup complete"

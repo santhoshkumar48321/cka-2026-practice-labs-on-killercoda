@@ -1,6 +1,7 @@
 ## Goal
 Allow traffic from frontend to backend while keeping policy least permissive.
 
-## Given
-- `frontend-app` in namespace `frontend`
-- `backend-api` in namespace `backend`
+## Requirements
+- Namespace `frontend` with Pod `frontend-app`
+- Namespace `backend` with Pod `backend-api`
+- Create a NetworkPolicy that only allows required frontend-to-backend traffic

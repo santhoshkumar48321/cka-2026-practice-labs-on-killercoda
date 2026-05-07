@@ -1,5 +1,6 @@
 ## Goal
 Install a CNI that enables pod networking and supports NetworkPolicy enforcement.
 
-## Requirement
-- Install Calico from manifest (NetworkPolicy enforcement required).
+## Requirements
+- Install Calico from its manifest
+- Ensure NetworkPolicy enforcement is available after install

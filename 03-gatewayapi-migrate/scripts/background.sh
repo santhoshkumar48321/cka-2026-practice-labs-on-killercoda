@@ -19,19 +19,19 @@ kubectl apply -f - <<'YAML'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-backend
+  name: web
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: api-backend
+      app: web
   template:
     metadata:
       labels:
-        app: api-backend
+        app: web
     spec:
       containers:
-      - name: api-backend
+      - name: web
         image: nginx:latest
         ports:
         - containerPort: 80
@@ -41,11 +41,11 @@ kubectl apply -f - <<'YAML'
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-backend-svc
+  name: web-svc
 spec:
   type: ClusterIP
   selector:
-    app: api-backend
+    app: web
   ports:
   - port: 80
     targetPort: 80
@@ -66,7 +66,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: api-backend-svc
+            name: web-svc
             port:
               number: 80
 YAML
