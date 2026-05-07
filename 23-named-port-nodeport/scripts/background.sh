@@ -1,31 +1,40 @@
-#!/bin/bash
-# Setup script for scenario 23
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready after 60 seconds" >&2
+  exit 1
+}
 
-# Create namespace
-kubectl create namespace portal
+wait_kube
 
-# Create deployment without port spec
-cat <<EOF | kubectl apply -f -
+kubectl apply -f - <<'YAML'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ui-frontend
-  namespace: portal
+  name: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ui-frontend
+      app: backend
   template:
     metadata:
       labels:
-        app: ui-frontend
+        app: backend
     spec:
       containers:
-      - name: nginx
-        image: nginx:1.27
-EOF
+      - name: backend
+        image: nginx:latest
+        ports:
+        - name: http
+          containerPort: 80
+YAML
 
-echo "Setup complete. Deployment ui-frontend ready in portal namespace."
+echo "Setup complete"

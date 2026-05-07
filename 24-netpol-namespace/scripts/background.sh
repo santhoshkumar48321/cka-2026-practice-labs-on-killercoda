@@ -1,48 +1,48 @@
-#!/bin/bash
-# Setup script for scenario 24
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready after 60 seconds" >&2
+  exit 1
+}
 
-# Create namespaces
-kubectl create namespace echo
-kubectl create namespace team-app
-kubectl label namespace team-app name=team-app --overwrite
+wait_kube
 
-# Create echo server in echo namespace
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: echo-server
-  namespace: echo
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: echo-server
-  template:
-    metadata:
-      labels:
-        app: echo-server
-    spec:
-      containers:
-      - name: echo
-        image: hashicorp/http-echo:0.2.3
-        args: ["-listen=:9000", "-text=Hello from echo"]
-        ports:
-        - containerPort: 9000
----
+kubectl create namespace frontend --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace backend --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl apply -f - <<'YAML'
 apiVersion: v1
-kind: Service
+kind: Pod
 metadata:
-  name: echo-svc
-  namespace: echo
+  name: frontend-pod
+  namespace: frontend
+  labels:
+    app: frontend
 spec:
-  selector:
-    app: echo-server
-  ports:
-  - port: 9000
-    targetPort: 9000
-EOF
+  containers:
+  - name: app
+    image: nginx:latest
+YAML
 
-echo "Setup complete. Echo server ready in echo namespace."
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backend-pod
+  namespace: backend
+  labels:
+    app: backend
+spec:
+  containers:
+  - name: app
+    image: nginx:latest
+YAML
+
+echo "Setup complete"

@@ -1,36 +1,35 @@
-#!/bin/bash
-# Setup script for scenario 19
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready after 60 seconds" >&2
+  exit 1
+}
 
-mkdir -p /opt/CKA2026/payment-api
+wait_kube
 
-# Create payment-api pod that generates logs including errors
-cat <<EOF | kubectl apply -f -
+kubectl apply -f - <<'YAML'
 apiVersion: v1
 kind: Pod
 metadata:
-  name: payment-api
-  labels:
-    app: payment
+  name: log-pod
 spec:
   containers:
-  - name: payment
+  - name: logger
     image: busybox:1.36
-    command: ["/bin/sh", "-c"]
-    args:
-      - |
-        i=0
-        while true; do
-          i=\$((i+1))
-          if [ \$((i % 3)) -eq 0 ]; then
-            echo "\$(date) error file-not-found: /data/config-\$i.json"
-          else
-            echo "\$(date) INFO: Processing request \$i"
-          fi
-          sleep 2
-        done
-EOF
+    command: ["/bin/sh","-c","while true; do echo \"INFO request ok\" >> /var/log/app.log; echo \"ERROR failed to process\" >> /var/log/app.log; sleep 1; done"]
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log
+  volumes:
+  - name: shared-logs
+    emptyDir: {}
+YAML
 
-sleep 10
-echo "Setup complete. Pod payment-api is generating logs."
+echo "Setup complete"

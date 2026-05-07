@@ -1,19 +1,60 @@
-#!/bin/bash
-# Setup script for scenario 20
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready after 60 seconds" >&2
+  exit 1
+}
 
-mkdir -p /opt/CKA2026
+wait_kube
 
-# Create StorageClass with volume expansion enabled
-cat <<EOF | kubectl apply -f -
+kubectl apply -f - <<'YAML'
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: csi-hostpath-sc
-provisioner: hostpath.csi.k8s.io
+  name: expandable
+provisioner: rancher.io/local-path
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
-EOF
+YAML
 
-echo "Setup complete. StorageClass csi-hostpath-sc is ready."
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: expandable
+  resources:
+    requests:
+      storage: 1Gi
+YAML
+
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: data-pod
+spec:
+  containers:
+  - name: app
+    image: busybox:1.36
+    command: ["/bin/sh","-c","sleep 3600"]
+    volumeMounts:
+    - name: data
+      mountPath: /data
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: data-pvc
+YAML
+
+echo "Setup complete"

@@ -1,9 +1,20 @@
-#!/bin/bash
-# Setup script for scenario 25
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready after 60 seconds" >&2
+  exit 1
+}
 
-# Create namespace
-kubectl create namespace app-squad
+wait_kube
 
-echo "Setup complete. Namespace app-squad is ready."
+kubectl create namespace apps --dry-run=client -o yaml | kubectl apply -f -
+kubectl create serviceaccount deploy-manager -n apps --dry-run=client -o yaml | kubectl apply -f -
+
+echo "Setup complete"
