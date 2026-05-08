@@ -4,13 +4,7 @@ Reconfigure an existing Deployment to expose a named port, then create a NodePor
 ## Requirements
 - Deployment name: `ui-frontend`
 - Namespace: `portal`
-
-1. Update the Deployment and add port spec:
-   - name: `http`
-   - containerPort: `80`
-   - protocol: `TCP`
-
-2. Create a Service:
-   - name: `ui-frontend-svc`
-   - expose target port by name: `http`
-   - type: `NodePort`
+- Deployment image: `nginx:1.27`
+- Port name: `http`
+- Container port: `80/TCP`
+- Service: `ui-frontend-svc` (NodePort, targetPort `http`)

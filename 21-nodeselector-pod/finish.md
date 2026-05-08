@@ -1,8 +1,5 @@
-## Congratulations!
+## Congratulations! 🎉
 
-You have successfully scheduled a Pod using nodeSelector.
+You scheduled a pod using nodeSelector against labeled nodes.
 
-### Key Takeaways
-- nodeSelector is the simplest form of node selection
-- Pods will only schedule on nodes matching all labels
-- Use `kubectl get nodes --show-labels` to find labeled nodes
+CKA domain covered: Workloads & Scheduling.
