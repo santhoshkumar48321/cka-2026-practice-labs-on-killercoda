@@ -1,12 +1,8 @@
 ## Tasks
-Create `autoscaling/v2` HPA `nginx-scaler` targeting `nginx-deployment` with:
-- 60% CPU target
-- min 2, max 6
-- scaleDown stabilizationWindowSeconds: 45
+- Create an `autoscaling/v2` HPA named `nginx-scaler` targeting deployment `nginx-deployment` in namespace `scaling`.
+- Set CPU target to 60%, minReplicas to 2, and maxReplicas to 6.
+- Configure scaleDown stabilization window to 45 seconds.
 
-## Verify
-```bash
-kubectl -n scaling get hpa
-kubectl -n scaling describe hpa nginx-scaler
-kubectl -n scaling get hpa nginx-scaler -o yaml | sed -n '/behavior:/,/metrics:/p'
-```
+## Hints
+- Use the `behavior.scaleDown.stabilizationWindowSeconds` field in the HPA spec.
+- Ensure the deployment has CPU requests set before creating the HPA.

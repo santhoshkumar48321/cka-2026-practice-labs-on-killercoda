@@ -1,19 +1,7 @@
 ## Tasks
-1. List Istio CRDs (default output):
-```bash
-kubectl get crd | grep istio.io > ~/crds-list.yaml
-```
+- List Istio CRDs and save the output to `~/crds-list.yaml`.
+- Use `kubectl explain` to capture documentation for `VirtualService.spec.hosts` in `~/hosts-spec.yaml`.
 
-2. Explain VirtualService hosts field:
-```bash
-kubectl explain virtualservice.spec.hosts > ~/hosts-spec.yaml
-# If needed (fully-qualified):
-kubectl explain virtualservice.networking.istio.io.spec.hosts > ~/hosts-spec.yaml
-```
-
-## Verify
-```bash
-ls -lh ~/crds-list.yaml ~/hosts-spec.yaml
-head -n 20 ~/crds-list.yaml
-head -n 40 ~/hosts-spec.yaml
-```
+## Hints
+- Use the fully-qualified name if `kubectl explain virtualservice.spec.hosts` is ambiguous.
+- The output files should be plain text, not YAML manifests.
