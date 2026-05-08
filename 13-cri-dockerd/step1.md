@@ -1,11 +1,8 @@
 ## Tasks
-1. Install package via dpkg
-2. Enable/start `cri-docker` service
-3. Apply sysctl values and persist them
+- Install the cri-dockerd package from `~/cri-dockerd_0.3.15.3-0.ubuntu-jammy_amd64.deb`.
+- Enable and start the `cri-docker` service.
+- Apply the required sysctl values and persist them.
 
-## Verify
-```bash
-dpkg -l | grep cri-dockerd
-systemctl is-active cri-docker
-sysctl net.bridge.bridge-nf-call-iptables net.ipv6.conf.all.forwarding net.ipv4.ip_forward net.netfilter.nf_conntrack_max
-```
+## Hints
+- Use `dpkg -i` to install the package.
+- Persist sysctl settings in `/etc/sysctl.d/`.

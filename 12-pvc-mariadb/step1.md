@@ -1,11 +1,8 @@
 ## Tasks
-1. Create PVC `database-storage` in namespace `database` (RWO, 500Mi)
-2. Edit `/opt/database.yaml` to mount and use this PVC
-3. Apply and verify deployment is running and stable
+- Create PVC `database-storage` in namespace `database` with 500Mi and ReadWriteOnce.
+- Edit `/opt/database.yaml` to use the new PVC for `/var/lib/mysql`.
+- Apply the manifest and verify the deployment is running.
 
-## Verify
-```bash
-kubectl -n database get pvc database-storage
-kubectl -n database describe pvc database-storage
-kubectl -n database get pods
-```
+## Hints
+- The PV already exists and uses `Retain`.
+- Ensure the PVC name matches the volume claim in the manifest.
