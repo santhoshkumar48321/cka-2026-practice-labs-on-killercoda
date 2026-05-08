@@ -1,46 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Common helpers
-wait_kube() {{
+wait_kube() {
   echo "Waiting for Kubernetes API..."
   for i in $(seq 1 60); do
     if kubectl get ns >/dev/null 2>&1; then
       return 0
     fi
-    sleep 2
+    sleep 1
   done
   echo "Kubernetes API not ready"
   exit 1
-}}
+}
 
 wait_kube
-kubectl create ns itk-nodeport >/dev/null 2>&1 || true
 
-# Create deployment with "wrong" port so student must fix it
+kubectl create ns services --dry-run=client -o yaml | kubectl apply -f -
+
 cat <<'YAML' | kubectl apply -f -
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: itk-nodeport-dep
-  namespace: itk-nodeport
+  name: service-deployment
+  namespace: services
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: itk-nodeport
+      app: service-deployment
   template:
     metadata:
       labels:
-        app: itk-nodeport
+        app: service-deployment
     spec:
       containers:
       - name: web
-        image: nginx:1.27
+        image: nginx:1.25
         ports:
-        - containerPort: 8080
+        - containerPort: 80
           name: web
 YAML
 
-# Cleanup service if rerun
-kubectl delete svc itk-nodeport-svc -n itk-nodeport --ignore-not-found
+kubectl delete svc service-nodeport -n services --ignore-not-found >/dev/null 2>&1 || true
+
+echo "Setup complete"

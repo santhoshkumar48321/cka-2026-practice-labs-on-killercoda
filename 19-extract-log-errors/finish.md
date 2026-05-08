@@ -1,8 +1,5 @@
-## Congratulations!
+## Congratulations! 🎉
 
-You have successfully extracted error log lines to a file.
+You extracted the relevant error lines from pod logs into a file for analysis.
 
-### Key Takeaways
-- `kubectl logs` retrieves container logs
-- Piping to `grep` filters specific patterns
-- Redirecting output saves logs for analysis
+CKA domain covered: Troubleshooting.

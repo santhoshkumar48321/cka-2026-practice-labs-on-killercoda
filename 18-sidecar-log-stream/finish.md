@@ -1,8 +1,5 @@
-## Congratulations!
+## Congratulations! 🎉
 
-You have successfully added a sidecar container to stream file-based logs.
+You added a sidecar container to stream file-based logs from a shared volume.
 
-### Key Takeaways
-- Sidecar pattern enables log streaming from file-based apps
-- Shared volumes allow containers to access the same files
-- `kubectl logs` can now access logs from both containers
+CKA domain covered: Workloads & Scheduling.

@@ -1,7 +1,5 @@
 ## Nice work ✅
 
-If you want to repeat: use the **Restart Scenario** button to reset the environment.
+You exposed the deployment with a NodePort service and the correct container port name.
 
-Tips:
-- Keep `kubectl get all -A` and `kubectl describe` close.
-- Prove success with the verification commands, not vibes 😄
+CKA domain covered: Services & Networking.
