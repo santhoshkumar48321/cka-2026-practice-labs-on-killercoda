@@ -2,7 +2,10 @@
 Adjust Pod requests/limits for stable operation and evenly distribute resources across 3 Pods.
 
 ## Requirements
+- Namespace: `default`
 - Deployment: `webapp-deployment`
+- Main container image: `busybox:1.36`
+- Init container image: `busybox:1.36`
 - Scale down to 1 for editing, then scale back to 3
 - Equal CPU/memory requests & limits per Pod
 - Add overhead (recommended 10% headroom)
