@@ -1,7 +1,5 @@
 ## Nice work ✅
 
-If you want to repeat: use the **Restart Scenario** button to reset the environment.
+You balanced requests and limits across the deployment so every pod gets a fair share.
 
-Tips:
-- Keep `kubectl get all -A` and `kubectl describe` close.
-- Prove success with the verification commands, not vibes 😄
+CKA domain covered: Workloads & Scheduling.

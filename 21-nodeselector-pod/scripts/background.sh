@@ -1,10 +1,21 @@
-#!/bin/bash
-# Setup script for scenario 21
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  echo "Waiting for Kubernetes API..."
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready"
+  exit 1
+}
 
-# Label the node with disk=ssd
-NODE=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
-kubectl label node "$NODE" disk=ssd --overwrite
+wait_kube
 
-echo "Setup complete. Node $NODE labeled with disk=ssd"
+node_name=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+kubectl label node "$node_name" disk=ssd --overwrite
+
+echo "Setup complete"

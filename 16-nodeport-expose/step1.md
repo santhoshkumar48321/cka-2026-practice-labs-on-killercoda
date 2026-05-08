@@ -1,13 +1,7 @@
 ## Tasks
-1. Update deployment `service-deployment` to expose container port:
-   - port 8080
-   - protocol TCP
-   - name `http`
+- Update deployment `service-deployment` to expose container port 8080/TCP named `http`.
+- Create NodePort service `service-nodeport` that exposes port 8080/TCP.
 
-2. Create NodePort service `service-nodeport` exposing port 8080/TCP.
-
-## Verify
-```bash
-kubectl -n services get deploy,svc
-kubectl -n services describe svc service-nodeport
-```
+## Hints
+- Match the service selector to the deployment labels.
+- Keep the service port and targetPort aligned on 8080.

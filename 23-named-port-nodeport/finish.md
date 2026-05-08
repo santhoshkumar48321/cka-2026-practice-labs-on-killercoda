@@ -1,8 +1,5 @@
-## Congratulations!
+## Congratulations! 🎉
 
-You have successfully added a named port and created a NodePort Service.
+You added a named port and wired a NodePort service to it.
 
-### Key Takeaways
-- Named ports make services more maintainable
-- Services can reference ports by name instead of number
-- NodePort exposes the service on each node's IP
+CKA domain covered: Services & Networking.

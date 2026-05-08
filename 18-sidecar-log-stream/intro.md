@@ -5,7 +5,9 @@ A legacy app writes logs to a file inside the container. You want the logs to be
 Add a sidecar container to an existing Pod to stream a file-based log.
 
 ## Requirements
+- Namespace: `default`
 - Existing Pod name: `atlas-app`
+- Main container image: `busybox:1.36`
 - Sidecar container name: `log-sidecar`
 - Sidecar image: `busybox:1.36`
 - Sidecar command: `/bin/sh -c "tail -n+1 -F /var/log/atlas-app.log"`

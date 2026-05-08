@@ -1,22 +1,9 @@
 ## Tasks
-1. Scale deployment to 1 replica:
-```bash
-kubectl scale deploy webapp-deployment --replicas=1
-```
+- Scale the deployment `webapp-deployment` down to 1 replica for safe editing.
+- Calculate fair per-pod requests/limits for 3 replicas with a small overhead buffer.
+- Update the deployment so init containers and main containers share identical requests/limits.
+- Scale the deployment back to 3 replicas and ensure it stabilizes.
 
-2. Calculate fair per-pod resources for 3 replicas using node allocatable, minus existing requests, with overhead (ex: 10%).
-
-3. Edit the deployment:
-   - apply the same requests/limits to initContainers and containers
-
-4. Scale back to 3:
-```bash
-kubectl scale deploy webapp-deployment --replicas=3
-kubectl rollout status deploy/webapp-deployment
-```
-
-## Verify
-```bash
-kubectl get pods -l app=webapp
-kubectl describe pod <pod> | egrep -A6 "Requests|Limits"
-```
+## Hints
+- Compare init container and main container resource blocks in the pod template.
+- Confirm replicas are back at 3 before finishing.

@@ -1,12 +1,9 @@
 ## Tasks
-Create the StorageClass `local-storage` with:
-- default annotation: `storageclass.kubernetes.io/is-default-class: "true"`
-- provisioner: `rancher.io/local-path`
-- volumeBindingMode: `WaitForFirstConsumer`
+- Create a StorageClass named `local-storage`.
+- Set the provisioner to `rancher.io/local-path`.
+- Set `volumeBindingMode` to `WaitForFirstConsumer`.
+- Mark the StorageClass as the default for the cluster.
 
-## Verify
-```bash
-kubectl get sc local-storage -o yaml
-kubectl get sc local-storage -o jsonpath='{.metadata.annotations.storageclass\.kubernetes\.io/is-default-class}'; echo
-kubectl get sc local-storage -o jsonpath='{.volumeBindingMode}'; echo
-```
+## Hints
+- Use the default-class annotation on the StorageClass metadata.
+- StorageClasses are cluster-scoped resources.

@@ -1,8 +1,5 @@
-## Congratulations!
+## Congratulations! 🎉
 
-You have successfully created an Ingress resource.
+You created an Ingress rule that routes traffic to the correct backend service.
 
-### Key Takeaways
-- Ingress provides HTTP/HTTPS routing to services
-- `pathType: Prefix` matches paths starting with the specified value
-- Backend specifies the service name and port
+CKA domain covered: Services & Networking.

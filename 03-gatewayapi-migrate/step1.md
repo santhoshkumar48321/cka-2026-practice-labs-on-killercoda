@@ -1,25 +1,8 @@
 ## Tasks
-1. Inspect existing Ingress `api-ingress` to capture:
-   - host
-   - tls secret
-   - backend service + port
-   - paths/rules
+- Inspect Ingress `api-ingress` to capture the host, TLS secret, backend service/port, and routing paths.
+- Create Gateway `api-gateway` using GatewayClass `nginx-gateway` with an HTTPS listener for `api.demo.k8s.local` and the same TLS secret.
+- Create HTTPRoute `api-route` for `api.demo.k8s.local`, attach it to `api-gateway`, and mirror the same backend routing rules as the Ingress.
 
-2. Create Gateway:
-   - name: `api-gateway`
-   - hostname: `api.demo.k8s.local`
-   - GatewayClass: `nginx-gateway`
-   - HTTPS listener using same TLS secret as Ingress
-
-3. Create HTTPRoute:
-   - name: `api-route`
-   - hostname: `api.demo.k8s.local`
-   - attach to `api-gateway` using parentRefs
-   - same routing rules as Ingress
-
-## Verify
-```bash
-kubectl get gateway,httproute -A
-kubectl describe gateway api-gateway
-kubectl describe httproute api-route
-```
+## Hints
+- Use `kubectl get ingress api-ingress -o yaml` to see the source routing rules.
+- Gateway API resources are in `gateway.networking.k8s.io`.

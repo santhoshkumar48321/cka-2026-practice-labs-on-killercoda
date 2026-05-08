@@ -1,8 +1,5 @@
-## Congratulations!
+## Congratulations! 🎉
 
-You have successfully created a PVC, mounted it, and expanded storage.
+You created, mounted, and expanded a PVC and recorded the resize event.
 
-### Key Takeaways
-- PVCs can be expanded if StorageClass allows it
-- Volume expansion is done by patching the PVC spec
-- Always verify the expansion completed successfully
+CKA domain covered: Storage.

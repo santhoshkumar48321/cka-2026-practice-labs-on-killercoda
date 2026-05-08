@@ -1,13 +1,7 @@
 ## Tasks
-1. Inspect kube-apiserver static pod manifest:
-   - `/etc/kubernetes/manifests/kube-apiserver.yaml`
+- Inspect `/etc/kubernetes/manifests/kube-apiserver.yaml`.
+- Replace the etcd server port `2380` with `2379` in `--etcd-servers`.
+- Save the manifest and wait for the static pod to restart.
 
-2. Find `--etcd-servers=...:2380` and correct it to `:2379`
-
-3. Save and wait for kubelet to restart static pod
-
-## Verify
-```bash
-kubectl get nodes
-kubectl -n kube-system get pods | grep kube-apiserver || true
-```
+## Hints
+- The kubelet will automatically reload the manifest after you save changes.

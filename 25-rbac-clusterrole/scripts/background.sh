@@ -1,9 +1,24 @@
-#!/bin/bash
-# Setup script for scenario 25
+#!/usr/bin/env bash
+set -euo pipefail
 
-until kubectl get nodes | grep -q " Ready"; do sleep 2; done
+wait_kube() {
+  echo "Waiting for Kubernetes API..."
+  for i in $(seq 1 60); do
+    if kubectl get ns >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Kubernetes API not ready"
+  exit 1
+}
 
-# Create namespace
-kubectl create namespace app-squad
+wait_kube
 
-echo "Setup complete. Namespace app-squad is ready."
+kubectl create ns app-squad --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl delete rolebinding pipeline-deployer-binding -n app-squad --ignore-not-found >/dev/null 2>&1 || true
+kubectl delete serviceaccount cicd-bot -n app-squad --ignore-not-found >/dev/null 2>&1 || true
+kubectl delete clusterrole pipeline-deployer --ignore-not-found >/dev/null 2>&1 || true
+
+echo "Setup complete"

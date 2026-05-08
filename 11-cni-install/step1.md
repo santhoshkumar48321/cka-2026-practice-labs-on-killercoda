@@ -1,11 +1,7 @@
 ## Tasks
-Install Calico (v3.27.4) using the manifest:
-```bash
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.4/manifests/tigera-operator.yaml
-```
+- Install Calico (v3.27.4) using the provided Tigera Operator manifest.
+- Wait for the tigera-operator deployment and calico-node daemonset to appear.
 
-## Verify
-```bash
-kubectl get pods -A | grep -E 'calico|tigera' || true
-kubectl get nodes
-```
+## Hints
+- Use `kubectl apply -f` with the manifest URL.
+- Check both `tigera-operator` and `calico-system` namespaces.
